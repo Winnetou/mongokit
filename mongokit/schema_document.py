@@ -242,9 +242,9 @@ class SchemaProperties(type):
 
 class SchemaDocument(dict):
     """
-    A SchemaDocument is dictionary with a building structured schema
-    The validate method will check that the document match the underling
-    structure. A structure must be specify in each SchemaDocument.
+    SchemaDocument is a dictionary with a built-in schema structure.
+    The validate method will check that the document matches the underlying
+    structure. The structure must be specified in each SchemaDocument.
 
     >>> class TestDoc(SchemaDocument):
     ...     structure = {
@@ -389,7 +389,7 @@ class SchemaDocument(dict):
         validate the document.
 
         This method will verify if :
-          * the doc follow the structure,
+          * the doc follows the structure,
           * all required fields are filled
 
         Additionally, this method will process all
@@ -452,30 +452,10 @@ class SchemaDocument(dict):
                     yield '%s.%s' % (new_key, new_child_key)
             elif type(key) is type:
                 yield '$%s' % key.__name__
-#            elif isinstance(value, list) and len(value):
-#                if isinstance(value[0], dict):
-#                    for child_key in cls.__walk_dict(value[0]):
-#                        #if type(key) is type:
-#                        #    new_key = "$%s" % key.__name__
-#                        #else:
-#                        if type(key) is not type:
-#                            new_key = key
-#                        #if type(child_key) is type:
-#                        #    new_child_key = "$%s" % child_key.__name__
-#                        #else:
-#                        if type(child_key) is not type:
-#                            new_child_key = child_key
-#                        yield '%s.%s' % (new_key, new_child_key)
-#                else:
-#                    if type(key) is not type:
-#                        yield key
-#                    #else:
-#                    #    yield ""
             else:
                 if type(key) is not type:
                     yield key
-                #else:
-                #    yield ""
+                
 
     @classmethod
     def _validate_structure(cls, structure, name, authorized_types):
@@ -486,8 +466,7 @@ class SchemaDocument(dict):
         def __validate_structure(struct, name, _authorized):
             if type(struct) is type:
                 if struct not in authorized_types:
-                    if struct not in authorized_types:
-                        raise StructureError("%s: %s is not an authorized type" % (name, struct))
+                    raise StructureError("%s: %s is not an authorized type" % (name, struct))
             elif isinstance(struct, dict):
                 for key in struct:
                     if isinstance(key, basestring):
@@ -755,7 +734,7 @@ class SchemaDocument(dict):
                                                       type(new_value).__name__))
                     doc[key] = new_value
             #
-            # if the value is a dict, we have a another structure to validate
+            # if the value is a dict, we have another structure to validate
             #
             if isinstance(struct[key], dict) and new_path not in self.i18n:
                 #
@@ -830,7 +809,7 @@ class SchemaDocument(dict):
                 new_key = key
             new_path = ".".join([path, new_key]).strip('.')
             #
-            # Automatique generate the skeleton with NoneType
+            # Automatically generate the skeleton with NoneType
             #
             if type(key) is not type and key not in doc:
                 if isinstance(struct[key], dict):
@@ -860,7 +839,7 @@ class SchemaDocument(dict):
                 else:
                     doc[key] = None
             #
-            # if the value is a dict, we have a another structure to validate
+            # if the value is a dict, we have another structure to validate
             #
             if isinstance(struct[key], dict) and type(key) is not type:
                 self.__generate_skeleton(doc[key], struct[key], new_path)
