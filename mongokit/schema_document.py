@@ -161,10 +161,10 @@ class SchemaProperties(type):
             ['_protected_field_names', '_namespaces', '_required_namespace'])
         for base in bases:
             parent = base.__mro__[0]
-            if hasattr(parent, 'structure'):
-                if parent.structure is not None:
+            if hasattr(parent, 'structure'): # tutaj sprawdza dziedziczenie po innym Documencie
+                if parent.structure is not None: # que?
                     #parent = parent()
-                    if parent.structure:
+                    if parent.structure:# parent.structure is not None == parent.structure, nie ???
                         if 'structure' not in attrs and parent.structure:
                             attrs['structure'] = parent.structure.copy()
                         else:
@@ -208,7 +208,7 @@ class SchemaProperties(type):
                     attrs['_required_namespace'].add(".".join(splited_rf[:index+1]))
             attrs['_collapsed_struct'] = DotCollapsedDict(attrs['structure'], remove_under_type=True)
         elif attrs.get('structure') is not None and name not in \
-                ["SchemaDocument", "Document", "VersionedDocument", "RevisionDocument"]:
+                ["SchemaDocument", "Document", "VersionedDocument", "RevisionDocument"]: # po cholere is not None?
             attrs['_collapsed_struct'] = {}
         attrs['_i18n_namespace'] = []
         if attrs.get('i18n'):
@@ -431,7 +431,7 @@ class SchemaDocument(dict):
     #
 
     @classmethod
-    def __walk_dict(cls, dic):
+    def __walk_dict(cls, dic): # uzyta w linii 199, ale w klasie SchemaProperties
         # thanks jean_b for the patch
         for key, value in dic.items():
             if isinstance(value, dict) and len(value):
@@ -453,7 +453,7 @@ class SchemaDocument(dict):
             elif type(key) is type:
                 yield '$%s' % key.__name__
             else:
-                if type(key) is not type:
+                if type(key) is not type: #bez sensu, skoro dwie linijki wyzej sprawdzil, ze type(key) is type ==False
                     yield key
                 
 
@@ -463,11 +463,11 @@ class SchemaDocument(dict):
         validate if all fields in self.structure are in authorized types.
         """
         ##############
-        def __validate_structure(struct, name, _authorized):
+        def __validate_structure(struct, name, _authorized): #_authorized to chyba ma byc authorized_types wiec po cholere to brac jako argument skoro i tak odwoluje sie do authorized_types jak 2 linijki nizej?
             if type(struct) is type:
                 if struct not in authorized_types:
                     raise StructureError("%s: %s is not an authorized type" % (name, struct))
-            elif isinstance(struct, dict):
+            elif isinstance(struct, dict): 
                 for key in struct:
                     if isinstance(key, basestring):
                         if "." in key:
@@ -715,7 +715,7 @@ class SchemaDocument(dict):
             # default_values :
             # if the value is None, check if a default value exist.
             # if exists, and it is a function then call it otherwise,
-            # juste feed it
+            # just feed it
             #
             if type(key) is not type:
                 if doc[key] is None and new_path in self.default_values:
