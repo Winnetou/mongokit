@@ -40,7 +40,8 @@ class User(Document):
         }
     }
     required_fields = ['user.password', 'user.email']  # what if openid ? password is None
-
+    use_dot_notation = True 
+    
     def set_login(self, login):
         self['_id'] = login
         self['user']['login'] = login
