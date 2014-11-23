@@ -25,8 +25,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from pymongo.cursor import Cursor as PymongoCursor
 from collections import deque
+
+from pymongo.cursor import Cursor as PymongoCursor
+
 
 
 class Cursor(PymongoCursor):
