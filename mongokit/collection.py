@@ -25,11 +25,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from warnings import warn
+
 from pymongo.collection import Collection as PymongoCollection
+
 from mongokit.mongo_exceptions import MultipleResultsFound
 from mongokit.cursor import Cursor
 
-from warnings import warn
+
 
 
 class Collection(PymongoCollection):
