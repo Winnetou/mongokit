@@ -54,6 +54,7 @@ class AuthTestCase(unittest.TestCase):
 
         assert user.verify_password("bla") == False
         assert user.verify_password("myp4$$ord") == True
+        assert user.password == user['user']['password']
         assert len(user.password) == len(user['user']['password']) == 80
         
         del user.password
@@ -69,6 +70,7 @@ class AuthTestCase(unittest.TestCase):
         user.email = u"user@foo.bar"
         user.password = u"u$ser_p4$$w0rd"
         print "°°°°°°°°°", user
+        user.validate()
         user.save()
 
         saved_user = self.col.SimpleUser.get_from_id('user')
@@ -77,7 +79,7 @@ class AuthTestCase(unittest.TestCase):
 
         assert user.login == u"user"
         assert user['_id'] == u'user'
-        assert user['user']['login'] == u'user'
+        assert user['user']['login'] == user.login == u'user'
         del user.login
         assert user['_id'] is None
         assert user['user']['login'] is None
@@ -104,6 +106,7 @@ class AuthTestCase(unittest.TestCase):
         user.login = u"user"
         user.email = u"user@foo.bar"
         user.password = "u$ser_p4$$w0rd"
+        user.validate()
         user.save()
 
         saved_user = self.col.SimpleUser.get_from_id('user')
