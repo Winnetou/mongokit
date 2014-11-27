@@ -5,7 +5,7 @@ The ``structure`` is a simple dict which defines the document's schema.
 
 Field Types
 -----------
-Field types are simple python type. By default, MongoKit allow the following 
+Field types are simple python types. By default, MongoKit allows the following 
 types::
 
     - None # Untyped field
@@ -29,8 +29,8 @@ types::
 Untyped field
 -------------
 
-Sometime you don't want to specify a type for a field. In order to allow a
-field to have any of the authorized types, just set the field to None into the
+Sometimes you don't want to specify a type for a field. In order to allow a
+field to have any of the authorized types, just set the field to ``None`` in the
 structure::
 
     class MyDoc(Document):
@@ -64,7 +64,7 @@ Python's dict syntax ``{}`` is used for describing nested structure::
 This validates that each document has an author dict which contains a string
 name and an integer number of books.
 
-If you want to a nested dict with no validation, you must use the dict type
+If you want to have a nested dict with no validation, you must use the dict type
 keyword instead::
 
     class Person(Document):
@@ -141,7 +141,7 @@ to describe it::
 >>> mydoc['book']
 [None, None, None]
 
-Tuple are converted into a simple list and add another validation layer. Fields
+Tuples are converted into a simple lists and add another validation layer. Fields
 must follow the right type:
 
 >>> mydoc['book'] = ['foobar', 1, 1.0]
@@ -168,7 +168,7 @@ As tuples are converted to list internally, you can make all list operations:
 Sets
 ^^^^
 
-The ``Set()`` python type is not supported in pymongo. If you want to use it
+The ``set()`` python type is not supported in pymongo. If you want to use it
 anyway, use the ``Set()`` custom type::
 
     class MyDoc(Document):
@@ -180,14 +180,14 @@ Using Custom Types
 ------------------
 
 Sometimes, we need to work with complex objects while their
-footprint in the database is fairly simple. Let's take a  
+footprint in the database is fairly simple. Let's take the python  
 datetime object. A datetime object can be useful to compute
-complex date but while mongodb can deal with datetime object,
-let's say that we just want to store the unicode representation.
+complex date and though MongoDB can deal with datetime object,
+we may want to store just its unicode representation.
 
-MongoKit allows you to work on a datetime object and store the unicode
-representation on the fly. In order to do this, we have to implement a CustomType
-and fill the custom_types attributes:
+MongoKit allows you to both work on a datetime object and store the simple unicode
+representation by converting it on the fly. In order to do this, we have to implement
+a CustomType and fill the custom_types attributes::
 
 >>> import datetime
 
@@ -196,15 +196,15 @@ A CustomType object must implement two methods and one attribute:
  -  ``to_bson(self, value)``: this method will convert the value to fit the
     correct authorized type before being saved in the db.
  -  ``to_python(self, value)``: this method will convert the value
-    taken from the db into a python object
+    taken from the db to a python object.
  -  ``validate(self, value, path)``: this method is optional and will add a
-    validation layer. Please, see the `Set()` CustomType code for more example.
- -  You must specify a ``mongo_type`` property in the ``CustomType`` class. this
-    will describes the type of the value stored in the mongodb.  
- -  If you want more validation, you can specify a ``python_type`` property which is
-    the python type the value will be converted. This is a good thing to specify it
+    validation layer. Please, see the `Set()` CustomType code for more examples.
+ -  You must specify a ``mongo_type`` property in the ``CustomType`` class. This
+    will define the type of the value stored in the MongoDB.  
+ -  If you want more validation options, you can specify a ``python_type`` property which is
+    the python type the value will be converted to. This is a good thing to specify it
     as it make a good documentation.
- -  ``init_type`` attribute will allow to describes an empty value. For example,
+ -  ``init_type`` attribute will allow to define an empty value. For example,
     if you implement the python set as CustomType, you'll set ``init_type`` to
     ``Set``. Note that ``init_type`` must be a type or a callable instance.
  
@@ -238,14 +238,14 @@ Now, let's create a Document::
             },
         }
 
-Now, we can create Foo's objects and working with python datetime objects
+Now, we can create Foo objects and work with python datetime objects::
 
 >>> foo = Foo()
 >>> foo['_id'] = 1
 >>> foo['foo']['date'] = datetime.datetime(2003,2,1)
 >>> foo.save()
 
-The saved object in db has the unicode footprint as expected:
+The object saved in the db has the unicode footprint as expected::
 
 >>> tutorial.find_one({'_id':1})
 {u'_id': 1, u'foo': {u'date': u'03-02-01'}}
@@ -257,7 +257,7 @@ python object:
 >>> foo['foo']['date']
 datetime.datetime(2003, 2, 1, 0, 0)
 
-OR, NOT, and IS types
+OR, NOT, and IS operators
 ----------------------
 
 You can also use boolean logic to do field type validation.
@@ -265,7 +265,8 @@ You can also use boolean logic to do field type validation.
 OR operator
 ^^^^^^^^^^^
 
-Let's say that we have a field which can be unicode or int or a float.
+Let's say that we want to define a field that can have values of 
+three possible types:: ``unicode``, ``int`` or  ``float``.
 We can use the OR operator to tell MongoKit to validate the field :
 
 >>> from mongokit import OR
@@ -282,7 +283,7 @@ We can use the OR operator to tell MongoKit to validate the field :
 >>> account['balance']['foo'] = 3.0
 >>> account.validate()
 
-but :
+Inserting value of a type not specified above will raise ``SchemaTypeError``::
 
 >>> account['balance']['foo'] = datetime.now()
 >>> account.validate()
@@ -293,8 +294,9 @@ SchemaTypeError: balance.foo must be an instance of <unicode or int or float> no
 NOT operator
 ^^^^^^^^^^^^
 
-You can also use the NOT operator to tell MongoKit that you don't want a such type
-for a field :
+You can also use the NOT operator to tell MongoKit that you don't want a given type
+for a field. Here, we want 'foo' to be of any type other than ``unicode`` and 
+``datetime``::
 
 >>> from mongokit import NOT
 >>> class Account(Document): 
@@ -309,7 +311,9 @@ for a field :
 >>> account['balance']['foo'] = 3.0
 >>> account.validate()
 
-and :
+Validation throws no errors, because both ``int`` and ``float`` are legal types
+for that value. If you try to set account['balance']['foo']
+to a value of a forbidden type, ``SchemaTypeError`` will be raised::
 
 >>> account['balance']['foo'] = datetime.now()
 >>> account.validate()
@@ -325,9 +329,8 @@ SchemaTypeError: balance.foo must be an instance of <not unicode, not datetime> 
 
 IS operator
 ^^^^^^^^^^^
-
-Sometimes, you might want to force a fields to be in a specific value. The IS operator
-must be use for this purpose :
+Sometimes, you might want to define a set of legal values for a given field. The IS operator
+was designed for this purpose ::
 
 >>> from mongokit import IS
 >>> class Account(Document): 
@@ -342,7 +345,9 @@ must be use for this purpose :
 >>> account['flag']['foo'] = u'phishing'
 >>> account.validate()
 
-and :
+Validation raises no errors. If your try to set account['flag']['foo']
+to a value other than the three specified above, an SchemaTypeError will be
+raised ::
 
 >>> account['flag']['foo'] = u'foo'
 >>> account.validate()
@@ -354,7 +359,7 @@ SchemaTypeError: flag.foo must be in [u'spam', u'controversy', u'phishing'] not 
 Schemaless Structure
 --------------------
 
-One of the main advantage of MongoDB is the ability to insert schemaless
+One of the main advantages of MongoDB is the ability to insert schemaless
 documents into the database. As of version 0.7, MongoKit allows you to
 save partially structured documents. For now, this feature must be activated.
 It will be the default behavior in a future release.
@@ -364,7 +369,7 @@ To enable schemaless support, use the ``use_schemaless`` attribute::
     class MyDoc(Document):
         use_schemaless = True
 
-Setting ``use_schemaless`` to True allow to have an unset structure but
+Setting ``use_schemaless`` to ``True`` allows to have an unset structure but
 you still can specify a structure::
 
     class MyDoc(Document):
